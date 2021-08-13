@@ -1,5 +1,10 @@
 \name{HDBRR}
 \alias{HDBRR}
+\alias{summary.HDBRR}
+\alias{print.summary.HDBRR}
+\alias{print.HDBRR}
+\alias{plot.HDBRR}
+\alias{predict.HDBRR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 High Dimensional Bayesian Ridge Regression without MCMC.
@@ -8,9 +13,19 @@ High Dimensional Bayesian Ridge Regression without MCMC.
 Ridge regression provide biased estimators of the regression parameters with lower variance. The HDBRR ("High Dimensional Bayesian Ridge Regression") function fits Bayesian Ridge regression without MCMC, this one uses the SVD or QR decomposition for the posterior computation.
 }
 \usage{
-HDBRR(y, X, a1 = 1, a2 = 1, b1 = 1, b2 = 1/ncol(X),
-    intercept = TRUE, npts = NULL, c = NULL, corpred = NULL,
-    method = c("svd", "qr"),bigmat = TRUE, ncores = 2)
+HDBRR(y, X, n0 = 5, p0 = 5, s20 = NULL, d20 = NULL, h = 0.5,
+    intercept = TRUE, vpapp = TRUE,npts = NULL,c = NULL,
+    corpred = NULL, method = c("svd","qr"),bigmat = TRUE, ncores = 2)
+
+\method{summary}{HDBRR}(object, all.coef = FALSE, crit = log(4), ...)
+
+\method{plot}{HDBRR}(x, crit = log(4), ...)
+
+\method{predict}{HDBRR}(object,  ...)
+
+\method{print}{summary.HDBRR}(x, ...)
+
+\method{print}{HDBRR}(x, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,43 +35,62 @@ The data vector (numeric, n) NAs allowed.
   \item{X}{
 Design Matrix of dimension \code{n x p}.
 }
-  \item{a1}{
-\code{n} a priori. \code{a1/2} is the shape parameter of the Gamma Inverse prior assigned to the residual variance. The default value for the \code{a1} parameter is 1.
+  \item{n0,p0}{
+\code{n0/2} and \code{p0/2} are the shape parameter of the Gamma Inverse prior assigned to the residual variance and the shape parameter of the Gamma Inverse prior assigned to the Beta's variance respectively. The default value for \code{n0/2} and \code{p0/2} parameter is 5.
 }
-  \item{a2}{
-\code{p} a priori. \code{a2/2} is the shape parameter of the Gamma Inverse prior assigned to the Beta's variance. The default value for the \code{a2} parameter is 1.
+  \item{s20,d20}{
+\code{(n0s20)/2} and \code{(p0d20)/2} are the scale parameter of the Gamma Inverse prior assigned to the residual variance and the scale parameter of the Gamma Inverse prior assigned to the Beta's variance respectively. The default value for the \code{s20} and \code{d20} is \code{NULL}. If the scale is not specified a value is calculated with \code{h} and quantiles.
 }
-  \item{b1}{
-\code{b1/2} is the scale parameter of the Gamma Inverse prior assigned to the residual variance. The default value for the \code{b1} parameter is 1.
-}
-  \item{b2}{
-\code{b2/2} is the scale parameter of the Gamma Inverse prior assigned to the Beta's variance. The default value for the \code{b2} parameter is \code{1/ncol(X)}, since the beta's variance is small, in this case \code{ncol(X) = p}, if \code{p} is large then \code{b2} is small.
+  \item{h}{
+(numeric, 0<\code{h}<1) shrinkage factor. Only used if the hyper-parameters are not specified; If h -> 0 then we have greater shrinkage, this is, \eqn{\beta} -> 0. If h -> 1 then we have less shrinkage.
 }
   \item{intercept}{
-Logic value. The default value for the intercept is TRUE.
+Logic value. The default value for the \code{intercept} is TRUE.
+}
+ \item{vpapp}{
+Logic value. Compute an approximation of the predictive variance. The default value for the \code{vpapp} is TRUE.
 }
   \item{npts}{
-Number (integer) of points used to evaluate the u's density for the numeric aprroach. The default value for the npts parameter is 200.
+Number (integer) of points used to evaluate the u's density for the numeric aprroach. The default value for the \code{npts} parameter is 200.
 }
   \item{c}{
-Auxiliary constant for the prior density for Beta in the variable selection, in this case the prior density is a mixture of a normal distribution.
+ratio of Gaussian densities (Spike/Slab) in the prior mixture density of each Beta for variable selection.
 }
   \item{corpred}{
-The method for the compute of the correlation, there are two methods, Empirical Basis (\code{"eb"}) and Bayesian (\code{"b"}) method. The default value for the parameter corpred is NULL. If the values is NULL then the corr and edf values will be NULL.
+The method for the compute of the correlation, there are two methods, Empirical Bayes (\code{"eb"}) and Bayesian (\code{"b"}) method. The default value for the parameter corpred is NULL. If the values is NULL then the corr and edf values will be NULL.
 }
   \item{method}{
-Options for the posterior computation. There are two methods available: \code{"qr"} and \code{"svd"} decomposition. The default value for the method is SVD decomposition.
+Options for the posterior computation. There are two methods available: \code{"qr"} decomposition of \code{X*t(X)} and \code{"svd"} decomposition of matrix \code{X}. The default value for the method is SVD decomposition.
 }
  \item{bigmat}{
-Use of the bigstatsr package. The default value for bigmat is \code{TRUE}.
+Use of the bigstatsr package. The default value for \code{bigmat} is \code{TRUE}.
 }
   \item{ncores}{
-Number of the cores for the auxiliary functions. The default value for the ncores is 2, you can detect your number of cores with detectCores() and use it.
+Number of the cores for computation. The default value for the ncores is 2, you can detect your number of cores with \code{detectCores()} and use it (iOS and Linux).
 }
+ \item{object}{
+    A HDBRR object, typically generated by a call to \code{HDBRR}.
+  }
+  \item{all.coef}{
+    Logical. Should results be returned for all ridge regression penalty
+    parameters (\code{all.coef = TRUE}), or only  those whose \code{log(bayes factor)>crit}.
+  }
+  \item{crit}{
+    Numerical. The lower bound of the log Bayes factor in favour to include a variable in the model. The default value for \code{crit} is \code{log(4)}.
+  }
+   \item{\dots}{
+    Additional arguments to be passed to or from other methods.
+  }
+  \item{x}{
+    A HDBRR object, typically generated by a call to \code{HDBRR} (for the
+    \code{print.HDBRR} and \code{plot.HDBRR} functions) or an object of class
+    \code{summary.HDBRR} (for the \code{print.summary.HDBRR}
+    function).
+  }
 }
 \details{
 Ridge regression is a useful tool to deal with colinerity in the homocesastic linear regression model providing biased estimators of the regression parameters with lower variance than the least square estimators.
-The model \deqn{y = X\beta + \epsilon} where \eqn{\epsilon} vector is assumed Normal with mean vector 0 and covariance matrix \eqn{\sigma^2 I_n}. See more \url{https://drive.google.com/drive/folders/1xJw7gM5_XiJipQ3grTZkfc6q4K0hzuCx?usp=sharing}
+The model \deqn{y = X\beta + \epsilon} where \eqn{\epsilon} vector is assumed Normal with mean vector 0 and covariance matrix \eqn{\sigma^2 I_n}. For further details see the vignettes in the package.
 }
 \value{
 List containing the following components:
@@ -65,6 +99,12 @@ Vector (numeric, \code{p})  with the betas estimates.
 }
 \item{yhat}{
 Vector (numeric, \code{n}) with the y's estimates.
+}
+\item{sdyhat}{
+Vector (numeric, \code{n}) with the standard deviation of the predicts values.
+}
+\item{sdpred}{
+Vector (numeric, \code{n}) with the standard deviation of predict variances.
 }
 \item{varb}{
 Vector (numeric, \code{p}) with the beta's variance.
@@ -109,13 +149,20 @@ Sergio Perez-Elizalde, Blanca E. Monroy-Castillo, Paulino Perez-Rodriguez.
 }
 
 \examples{
-n <- 30
-p <- 100
-X <- matrix(rnorm(n*(p-1),1,1/p),nrow = n,ncol = p-1)
-Beta <- sample(1:p,p-1,rep = FALSE)
-Beta <- c(1,Beta)
-y <- cbind(rep(1,n),X) \%*\% Beta+rnorm(n,0,1)
-fit <- HDBRR(y,X/sqrt(p), intercept = TRUE, c = 100, cor = "b")
+\dontrun{
+
+data("phenowheat")
+mod <- lmer(pheno$HD~pheno$env+(1|pheno$Line))
+y <- unlist(ranef(mod))
+n <- length(y)
+X <- scale(X, scale=F)
+fitall <- HDBRR(y,X/sqrt(ncol(X)),intercept = FALSE, corpred = "eb", c = 100)
+fitall
+sumarry(fitall)
+plot(fitall)
+predict(fitall)
+
+}
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

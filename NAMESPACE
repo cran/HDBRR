@@ -1,8 +1,16 @@
 # Default NAMESPACE created by R
 # Remove the previous line if you edit this file
 
+S3method(summary,HDBRR)
+S3method(print,summary.HDBRR)
+S3method(print,HDBRR)
+S3method(plot,HDBRR)
+S3method(predict,HDBRR)
+
+
 # Export all names
-exportPattern(".")
+exportPattern(HDBRR,
+              matop)
 
 # Import all packages listed as Imports or Depends
 import(
@@ -10,5 +18,6 @@ import(
   parallel,
   bigstatsr,
   MASS,
+  graphics,
   stats
 )

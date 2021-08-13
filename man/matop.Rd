@@ -1,7 +1,7 @@
 \name{matop}
 \alias{matop}
 \title{
-Matop
+matop
 }
 \description{
 Compute the SVD or QR decomposition of the matrix X.
