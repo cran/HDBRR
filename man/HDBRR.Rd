@@ -145,7 +145,7 @@ Vector (numeric, \code{n}) of the correlation between \code{y_i} estimates and \
 }
 
 \author{
-Sergio Perez-Elizalde, Blanca E. Monroy-Castillo, Paulino Perez-Rodriguez.
+Sergio Perez-Elizalde, Blanca E. Monroy-Castillo, Paulino Perez-Rodriguez, Jose Crossa.
 }
 
 \examples{

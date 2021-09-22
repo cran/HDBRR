@@ -1,4 +1,4 @@
-b5d0ca288ead9dd9088a620e818a9646 *DESCRIPTION
+65dcffe26639516e13badf0cd2fa17a2 *DESCRIPTION
 29fe0d423515c127717ff98a04131784 *NAMESPACE
 1cec9fff3d9793eb70a67250865b3d72 *R/HDBRR.R
 7855df6bcef6035ed270966b5b6de2da *R/X.R
@@ -11,16 +11,16 @@ ebc9ed9eff572dba2057af4b0a6af56f *R/print.summary.HDBRR.R
 254ddf737a7cb0f35219793b767eff39 *R/summary.HDBRR.R
 2a58433bc142495217a12da35c895060 *build/vignette.rds
 bf4a736fb9deaec08e1df0bcd812b8aa *data/phenowheat.RData
-81151e5b1052a8a124941d3b0f57dee1 *inst/doc/HDBRR.Rnw
-08af244bdc937cc365b9aa0feaabdce2 *inst/doc/HDBRR.pdf
-2383228a7344bbd8506309b5225096e2 *man/HDBRR.Rd
+dd1c908aebe97bc3f79609b939e25106 *inst/doc/HDBRR.Rnw
+32ba546a2a1c8eb0ee98941c8ae4683b *inst/doc/HDBRR.pdf
+fe7e8e15c1b2b7efa48dcbefc7a64310 *man/HDBRR.Rd
 9206459f5622c79c97e5d23c363f6ee2 *man/X.Rd
 7d56d343cc0864b4bed0fcc7afabacbe *man/matop.Rd
-a8269df55c7d73eaac09785a1176b336 *man/pheno.Rd
+07856c272625383963c6422673073390 *man/pheno.Rd
 468daec9add8d466e8e00dd53b7d3cd5 *man/phenowheat.Rd
 33c04a5f183b8647233471d9aea598c6 *vignettes/1.pdf
 fa3efec31e3f158473985e05a059dbbe *vignettes/2.pdf
 fc0593c6cde59cd9d7f3d7c310bac33d *vignettes/3.pdf
 cd37d7fbca688001f806761d44f1a219 *vignettes/4.pdf
-81151e5b1052a8a124941d3b0f57dee1 *vignettes/HDBRR.Rnw
+dd1c908aebe97bc3f79609b939e25106 *vignettes/HDBRR.Rnw
 d0142d1110aad113351851faaa8363ab *vignettes/references.bib
