@@ -6,7 +6,7 @@ summary.HDBRR <- function(object, all.coef = FALSE, crit = log(4), ...){
   if(!inherits(object, "HDBRR")) stop("This function only works for objects of class 'HDBRR'\n");
   Inter <- object$intercept
   tval <- as.matrix(object$betahat/sqrt(object$varb))
-  p <- object$phat
+  p <- abs(object$phat)
   if(is.null(p)){
     cat("\n")
     cat("c must be different to NULL to obtain the Bayes factor.\n\n")
@@ -36,7 +36,7 @@ summary.HDBRR <- function(object, all.coef = FALSE, crit = log(4), ...){
     }
   }
   else{
-    pvalues <- as.matrix(object$phat/(1-object$phat))
+    pvalues <- as.matrix(abs(object$phat)/(1-abs(object$phat)))
     pvalues <- 2*log(pvalues)
     pvaluessig <- as.matrix(rep(0, length(pvalues)))
     for (j in 1:length(pvalues)) {

@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{BGLR-extdoc}
+%\VignetteIndexEntry{HDBRR-extdoc}
 \documentclass[article,shortnames,nojss]{jss}
 
 %Extra packages
@@ -53,17 +53,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% almost as usual
-\author{P\'erez-Elizalde S. \\Colegio de Postgraduados$^{*}$ \And \,\,
-        Monroy-Castillo B.$^{*}$ \And \,\,\,\,\,\,\,\,\quad
+\author{Monroy-Castillo B. \\Colegio de Postgraduados$^{*}$ \And \,\,
+        P\'erez-Elizald S.$^{*}$ \And \,\,\,\,\,\,\,\,\quad
         P\'erez-Rodr\'iguez P.$^{*}$ \And
         Crossa J.\\CIMMyT}
 
 \title{HDBRR: A Statistical Package for a High Dimension Ridge Regression withouth MCMC}
 
 %% for pretty printing and a nice hypersummary also set:
-\Plainauthor{Sergio P\'erez-Elizalde, Blanca Monroy-Castillo, Paulino P\'erez-Rodr\'iguez} %% comma-separated
-\Plaintitle{HDBRR: A Statistical Package for a High Dimension Ridge Regression withouth MCMC} %% without formatting
-\Shorttitle{\pkg{HDBRR}: An R-package for Ridge Regression withouth MCMC} %% a short title (if necessary)
+\Plainauthor{Blanca Monroy-Castillo, Sergio P\'erez-Elizalde, Paulino P\'erez-Rodr\'iguez} %% comma-separated
+\Plaintitle{HDBRR: A Statistical Package for High Dimensional Ridge Regression without MCMC} %% without formatting
+\Shorttitle{\pkg{HDBRR}: An R-package for Ridge Regression without MCMC} %% a short title (if necessary)
 
 %% an abstract and keywords
 \Abstract{

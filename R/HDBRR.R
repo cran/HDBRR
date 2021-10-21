@@ -521,7 +521,7 @@ HDBRR <- function(y, X, n0 = 5, p0 = 5, s20 = NULL, d20 = NULL, h=0.5, intercept
 
   res <- list(betahat = betahat,yhat = yhat,sdyhat = sdyhat,sdpred = sdpred,
               varb = varb,sigsqhat = sigsqhat,sigbsqhat = sigbsqhat,u = u,postu = postu,
-              uhat = uhat,umode = umode,whichNa = whichNa,phat = phat,delta = delta,edf = edf,corr = corr,
+              uhat = uhat,umode = umode,whichNa = whichNa,phat = abs(phat),delta = delta,edf = edf,corr = corr,
               y = y, intercept = intercept, call = cl, model_frame = m, x = X)
   class(res) <- "HDBRR"
   return(res)

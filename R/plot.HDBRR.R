@@ -7,7 +7,7 @@ plot.HDBRR <- function(x, crit = log(4), ...){
   fit <- x
   if(!inherits(fit, "HDBRR")) stop("This function only works for objects of class 'HDBRR'\n");
   n <- nrow(fit$x)
-  phat <- fit$phat
+  phat <- abs(fit$phat)
   betahat <- fit$betahat
   bf <- phat/(1-phat)
   bf <- 2*log(bf)
@@ -39,7 +39,7 @@ plot.HDBRR <- function(x, crit = log(4), ...){
   par(mfrow=c(2,2))
   plot(fit$y,fit$yhat, xlab = "y observed", ylab = "y predicted")
   abline(a=0,b=1)
-  text(quantile(fit$yhat)[[5]],-quantile(fit$yhat)[[5]],paste("cor=",round(cor(fit$y,fit$yhat),4)))
+  text(quantile(fit$yhat)[[3]],-quantile(fit$yhat)[[3]],paste("cor=",round(cor(fit$y,fit$yhat),4)))
   plot(fit$betahat, ylab = "Coefficients")
   plot(sqrt(fit$varb),ylab="Std. dev.")
   plot(fit$betahat/sqrt(fit$varb),ylab="SNR")
