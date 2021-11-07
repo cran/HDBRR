@@ -54,11 +54,11 @@
 
 %% almost as usual
 \author{Monroy-Castillo B. \\Colegio de Postgraduados$^{*}$ \And \,\,
-        P\'erez-Elizald S.$^{*}$ \And \,\,\,\,\,\,\,\,\quad
+        P\'erez-Elizalde S.$^{*}$ \And \,\,\,\,\,\,\,\,\quad
         P\'erez-Rodr\'iguez P.$^{*}$ \And
         Crossa J.\\CIMMyT}
 
-\title{HDBRR: A Statistical Package for a High Dimension Ridge Regression withouth MCMC}
+\title{HDBRR: A Statistical Package for High Dimensional Ridge Regression without MCMC}
 
 %% for pretty printing and a nice hypersummary also set:
 \Plainauthor{Blanca Monroy-Castillo, Sergio P\'erez-Elizalde, Paulino P\'erez-Rodr\'iguez} %% comma-separated

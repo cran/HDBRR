@@ -158,8 +158,8 @@ n <- length(y)
 X <- scale(X, scale=F)
 fitall <- HDBRR(y,X/sqrt(ncol(X)),intercept = FALSE, corpred = "eb", c = 100)
 fitall
-sumarry(fitall)
-plot(fitall)
+sumarry(fitall, crit = 0)
+plot(fitall, crit = 0)
 predict(fitall)
 
 }
