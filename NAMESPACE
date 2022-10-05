@@ -6,6 +6,7 @@ S3method(print,summary.HDBRR)
 S3method(print,HDBRR)
 S3method(plot,HDBRR)
 S3method(predict,HDBRR)
+S3method(coef,HDBRR)
 
 
 # Export all names

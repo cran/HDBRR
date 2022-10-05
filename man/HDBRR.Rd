@@ -1,10 +1,12 @@
 \name{HDBRR}
+\docType{package}
 \alias{HDBRR}
 \alias{summary.HDBRR}
 \alias{print.summary.HDBRR}
 \alias{print.HDBRR}
 \alias{plot.HDBRR}
 \alias{predict.HDBRR}
+\alias{coef.HDBRR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 High Dimensional Bayesian Ridge Regression without MCMC.
@@ -15,17 +17,19 @@ Ridge regression provide biased estimators of the regression parameters with low
 \usage{
 HDBRR(y, X, n0 = 5, p0 = 5, s20 = NULL, d20 = NULL, h = 0.5,
     intercept = TRUE, vpapp = TRUE,npts = NULL,c = NULL,
-    corpred = NULL, method = c("svd","qr"),bigmat = TRUE, ncores = 2)
+    corpred = NULL, method = c("svd","qr"),bigmat = TRUE, ncores = 2, svdx = NULL)
 
 \method{summary}{HDBRR}(object, all.coef = FALSE, crit = log(4), ...)
 
-\method{plot}{HDBRR}(x, crit = log(4), ...)
+\method{plot}{HDBRR}(x, crit = log(4), var_select = FALSE, post = FALSE, ...)
 
 \method{predict}{HDBRR}(object,  ...)
 
 \method{print}{summary.HDBRR}(x, ...)
 
 \method{print}{HDBRR}(x, ...)
+
+\method{coef}{HDBRR}(object, all = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -87,6 +91,18 @@ Number of the cores for computation. The default value for the ncores is 2, you 
     \code{summary.HDBRR} (for the \code{print.summary.HDBRR}
     function).
   }
+  \item{var_select}{
+    Logical. If is TRUE a plot with variable selection is returned. The default value is FALSE.
+  }
+   \item{post}{
+    Logical. If is TRUE a plot with marginal posterior of u is returned. The default value is FALSE.
+  }
+  \item{all}{
+    Logical. All coefficients are returned. If is FALSE, then, if \code{p > 250} only 250 coefficients are returned. The default value es FALSE.
+  }
+  \item{svdx}{
+    It is possible to add the svd. The default value es NULL.
+  }
 }
 \details{
 Ridge regression is a useful tool to deal with colinerity in the homocesastic linear regression model providing biased estimators of the regression parameters with lower variance than the least square estimators.
@@ -141,6 +157,9 @@ Value (numeric) of the effective degrees of freedom for regression.
 }
 \item{corr}{
 Vector (numeric, \code{n}) of the correlation between \code{y_i} estimates and \code{y_i}.
+}
+\item{svdx}{
+The svd decomposition.
 }
 }
 

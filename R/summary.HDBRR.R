@@ -36,25 +36,25 @@ summary.HDBRR <- function(object, all.coef = FALSE, crit = log(4), ...){
     }
   }
   else{
-    pvalues <- as.matrix(abs(object$phat)/(1-abs(object$phat)))
-    pvalues <- 2*log(pvalues)
-    pvaluessig <- as.matrix(rep(0, length(pvalues)))
-    for (j in 1:length(pvalues)) {
-      if(pvalues[j] > 10)
-      {pvaluessig[j] <- "***"}
+    oddvalues <- as.matrix(abs(object$phat)/(1+10E-6-abs(object$phat)))
+    oddvalues <- 2*log(oddvalues)
+    oddvaluessig <- as.matrix(rep(0, length(oddvalues)))
+    for (j in 1:length(oddvalues)) {
+      if(oddvalues[j] > 10)
+      {oddvaluessig[j] <- "***"}
       else{
-        if(pvalues[j] > 6 && pvalues[j] <= 10)
-        {pvaluessig[j] <- "**"}
+        if(oddvalues[j] > 6 && oddvalues[j] <= 10)
+        {oddvaluessig[j] <- "**"}
         else{
-          if(pvalues[j] >= 2 && pvalues[j] <= 6)
-          {pvaluessig[j] <- "*"}
-          else{pvaluessig[j] <- " "}
+          if(oddvalues[j] >= 2 && oddvalues[j] <= 6)
+          {oddvaluessig[j] <- "*"}
+          else{oddvaluessig[j] <- " "}
         }
       }
     }
     coefs <- as.matrix(rbind(object$betahat))
     varb <- as.matrix(rbind(sqrt(object$varb)))
-    coefs_sign <- which(pvalues >= crit)
+    coefs_sign <- which(oddvalues >= crit)
     if(all.coef == TRUE){
       if(Inter == 1){
         files <- as.matrix(c("(Intercept)", colnames(object$x)[-1]))
@@ -64,7 +64,7 @@ summary.HDBRR <- function(object, all.coef = FALSE, crit = log(4), ...){
           colnames(object$x)[-1] <- paste("X",1:(p-1),sep="")
         }
         files <- as.matrix(c("(Intercept)",colnames(object$x)[-1]))
-        summary <- data.frame(t(coefs), t(varb), tval, pvalues, pvaluessig, row.names = files)
+        summary <- data.frame(t(coefs), t(varb), tval, oddvalues, oddvaluessig, row.names = files)
         colnames(summary) <- c("Estimate", "Std. dev", "SNR", "2ln(BF))", " ")
       }
       else{
@@ -75,7 +75,7 @@ summary.HDBRR <- function(object, all.coef = FALSE, crit = log(4), ...){
           colnames(object$x) <- paste("X",1:p,sep="")
         }
         files <- as.matrix(colnames(object$x))
-        summary <- data.frame(t(coefs), t(varb), tval, pvalues, pvaluessig, row.names = files)
+        summary <- data.frame(t(coefs), t(varb), tval, oddvalues, oddvaluessig, row.names = files)
         colnames(summary) <- c("Estimate", "Std. dev", "SNR", "2ln(BF)", " ")
       }
     }
@@ -90,7 +90,7 @@ summary.HDBRR <- function(object, all.coef = FALSE, crit = log(4), ...){
         names <- colnames(object$x)[-1]
         files <- as.matrix(c("(Intercept)",names))[coefs_sign]
         summary <- data.frame(t(coefs)[coefs_sign], t(varb)[coefs_sign], tval[coefs_sign],
-                              pvalues[coefs_sign], pvaluessig[coefs_sign], row.names = files)
+                              oddvalues[coefs_sign], oddvaluessig[coefs_sign], row.names = files)
         colnames(summary) <- c("Estimate", "Std. dev", "SNR", "2ln(BF)", " ")
       }
       else{
@@ -102,7 +102,7 @@ summary.HDBRR <- function(object, all.coef = FALSE, crit = log(4), ...){
         }
         files <- as.matrix(colnames(object$x)[coefs_sign])
         summary <- data.frame(t(coefs)[coefs_sign], t(varb)[coefs_sign], tval[coefs_sign],
-                              pvalues[coefs_sign], pvaluessig[coefs_sign], row.names = files)
+                              oddvalues[coefs_sign], oddvaluessig[coefs_sign], row.names = files)
         colnames(summary) <- c("Estimate", "Std. dev", "SNR", "2ln(BF)", " ")
       }
     }

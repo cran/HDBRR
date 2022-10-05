@@ -1,4 +1,5 @@
 \name{pheno}
+\docType{data}
 \alias{pheno}
 \title{Durum Wheat}
 

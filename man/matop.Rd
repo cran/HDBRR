@@ -1,4 +1,5 @@
 \name{matop}
+\docType{package}
 \alias{matop}
 \title{
 matop
@@ -7,12 +8,12 @@ matop
 Compute the SVD or QR decomposition of the matrix X.
 }
 \usage{
-matop(y, X, method = c("svd", "qr"), bigmat = TRUE)
+matop(y = NULL, X, method = c("svd", "qr"), bigmat = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{y}{
-The data vector (numeric, n) NAs allowed.
+The data vector (numeric, n) NAs allowed. The default value is NULL, It is possible to compute the SVD or QR decomposition without y.
 }
   \item{X}{
 Design Matrix of dimension n x p.

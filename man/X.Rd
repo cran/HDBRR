@@ -1,4 +1,5 @@
 \name{X}
+\docType{data}
 \alias{X}
 \title{Durum Wheat X}
 \description{

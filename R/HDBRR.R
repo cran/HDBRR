@@ -78,7 +78,7 @@ bigparallelr::set_blas_ncores(nb_cores())
 }
 
 
-matop <- function(y,X,method = c("svd","qr"), bigmat = TRUE){
+matop <- function(y=NULL,X,method = c("svd","qr"), bigmat = TRUE){
   n <- nrow(X)
   p <- ncol(X)
   Xfbm <- FBM(n, p)
@@ -120,7 +120,9 @@ matop <- function(y,X,method = c("svd","qr"), bigmat = TRUE){
   }
 
   if(method[1]=="svd"){
-    Ly <- big_cprodMat(L,as.matrix(y,ncol=1))
+  	if(!is.null(y)){
+  		Ly <- big_cprodMat(L,as.matrix(y,ncol=1))
+  		} else Ly <- NULL
     LD <- big_prodMat(L,diag(D))
     return(list(y=y,X=X,D=D,L=L,R=R,ev=ev,LD=LD,Ly=Ly,n=n,p=p))
   } else{
@@ -333,7 +335,7 @@ matop <- function(y,X,method = c("svd","qr"), bigmat = TRUE){
 
 
 HDBRR <- function(y, X, n0 = 5, p0 = 5, s20 = NULL, d20 = NULL, h=0.5, intercept = TRUE,
-      vpapp = TRUE,npts = NULL,c = NULL, corpred = NULL, method = c("svd","qr"),bigmat = TRUE, ncores = 2){
+      vpapp = TRUE,npts = NULL,c = NULL, corpred = NULL, method = c("svd","qr"),bigmat = TRUE, ncores = 2, svdx=NULL){
 
   sysinfo <- Sys.info()
   OS <- sysinfo[['sysname']]
@@ -388,7 +390,9 @@ HDBRR <- function(y, X, n0 = 5, p0 = 5, s20 = NULL, d20 = NULL, h=0.5, intercept
   whichNa <- which(isNA)
   y <- y[!isNA]
   X <- X[!isNA,]
-  svdx <- matop(y,X,bigmat = bigmat,method = "svd")
+  if(is.null(svdx)){
+  	svdx <- matop(y,X,bigmat = bigmat,method = "svd")
+  	}
   u0 <- seq(1E-6,1-1E-6,length=10)
   dn0 <- sapply(1:10,function(i).logdn0(u0[i],a1,a2,b1,b2,svdx,matdec="svd"))
   u0 <- u0[which.max(dn0)]
@@ -416,7 +420,9 @@ HDBRR <- function(y, X, n0 = 5, p0 = 5, s20 = NULL, d20 = NULL, h=0.5, intercept
   postu <- probs <- probs/sum(probs)
 
   if(method[1]=="qr"){
-    svdx <- matop(y,X,bigmat = bigmat,method = "qr")  #Cambio
+  if(is.null(svdx)){
+  	svdx <- matop(y,X,bigmat = bigmat,method = "qr")
+  	}  
     margu <- .postu(umode,a1,a2,b1,b2,svdx,ncores = ncores,method = method)
     probs <- 1
   } else{
@@ -517,12 +523,11 @@ HDBRR <- function(y, X, n0 = 5, p0 = 5, s20 = NULL, d20 = NULL, h=0.5, intercept
   y <- y+ybar*(!intercept)
 
   intercept  <- intercept*1
-
-
+  
   res <- list(betahat = betahat,yhat = yhat,sdyhat = sdyhat,sdpred = sdpred,
               varb = varb,sigsqhat = sigsqhat,sigbsqhat = sigbsqhat,u = u,postu = postu,
-              uhat = uhat,umode = umode,whichNa = whichNa,phat = abs(phat),delta = delta,edf = edf,corr = corr,
-              y = y, intercept = intercept, call = cl, model_frame = m, x = X)
+              uhat = uhat,umode = umode,whichNa = whichNa,phat = phat,delta = delta,edf = edf,corr = corr,
+              y = y, intercept = intercept, call = cl, model_frame = m, x = X,svdx=svdx)
   class(res) <- "HDBRR"
   return(res)
 }

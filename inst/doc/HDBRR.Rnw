@@ -1,6 +1,7 @@
 %\VignetteIndexEntry{HDBRR-extdoc}
 \documentclass[article,shortnames,nojss]{jss}
 
+
 %Extra packages
 \usepackage{amsmath}
 \usepackage{amsthm, amssymb,latexsym,amsfonts}
@@ -9,6 +10,8 @@
 \usepackage{graphicx}
 \usepackage{appendix}
 \usepackage{rotating}
+\usepackage{multirow, array}
+
 
 \newlength{\RoundedBoxWidth}
 \newsavebox{\GrayRoundedBox}
@@ -461,55 +464,199 @@ Since manipulating high dimensional inverse matrices is complicated and expensiv
 
 \section{Results}
 
-With this information we can build the package \pkg{HDBRR} \citep{HDBRR} in \proglang{R}, the HDBRR function is,
-
+An package named \proglang{HDBRR} was built in  \proglang{R} for implementing the methodology described in the previous sections. This package is available from CRAN at \url{https://CRAN.R-project.org/package=HDBRR}.
+The main function in the package is also named \proglang{HDBRR} and its parameters with their default values are given in the Box 1a.
 \begin{GrayBox}
 \small
 \textbf{Box 1a: List of arguments of the HDBRR function}
 
 \begin{verbatim}
 HDBRR(y, X, n0 = 5, p0 = 5, s20 = NULL, d20 = NULL, h = 0.5,
-    intercept = TRUE, vpapp = TRUE,npts = NULL,c = NULL,
-    corpred = NULL, method = c("svd","qr"),bigmat = TRUE, ncores = 2)
+    intercept = TRUE, vpapp = TRUE, npts = NULL, c = NULL,
+    corpred = NULL, method = c("svd","qr"), bigmat = TRUE, ncores = 2)
 \end{verbatim}
 \end{GrayBox}
+\textbf{Inputs}\\\\ Box 1a displays a list of the main arguments of the \textbf{HDBRR} function implemented in the \proglang{HDBRR} package, a short description follows:
+\begin{itemize}
+\item  {\tt y, X} \, are the data vector, generally referred to as the  \textit{response variable} vector,  {\tt NA}'s allowed, and the design matrix of dimension $n \times p$ respectively.
+\item  {\tt n0, p0}  are the numerators of the shape parameters {\tt n0/2} and {\tt p0/2} of the Inverse Gamma prior assigned to the residual variance and the shape parameter of the Inverse Gamma prior assigned to the regression coefficients variance, respectively. The default value for {\tt n0/2} and {\tt p0/2}  hyperparameter is {\tt 5}.
+ \item  {\tt s20, d20, h} \, are the numerators of scale parameters {\tt (n0s20)/2} and {\tt (p0d20)/2}  of the Inverse Gamma prior assigned to the residual variance and the scale parameter of the Inverse Gamma prior assigned to the regression coefficients variance respectively. By default s20 and d20 are NULL which means that these parameters will be set at runtime internally, where {\tt h} is a dimensionless shrinkage coefficient, {\tt 0}$<${\tt h}$<${\tt 1}.  If {\tt h} $\to$ {\tt 0} then we have greater shrinkage, that is, $\beta$ $\to$ {\tt 0}. If {\tt h} $\to$ {\tt 1} then we will have less shrinkage.
+\item  {\tt intercept} \, Logical argument. Default value  is {\tt TRUE}. A model with intercept is fitted.
+\item  {\tt vpapp} \, Logical argument. Default value is {\tt TRUE}. Computes an approximation of the predictive variance.
+\item  {\tt npts, c} \, number (integer) of points used to numerical evaluation of  the density of $u$. The default value for the {\tt npts} parameter is {\tt 200} and {\tt c} is the ratio of Gaussian densities (Spike/Slab) in the prior mixture for variable selection.
+\item  {\tt corpred} \,   method to compute the correlation between the pairs of predicted and observed.  There are two available methods, Empirical Bayes ({\tt "eb"}) and Bayesian method ({\tt "b"}). The default value for the parameter {\tt corpred} is {\tt NULL}. If the value is {\tt NULL} then the output values  {\tt corr} and {\tt edf} will be {\tt NULL}.
+\item  {\tt method} \, Options for the posterior computation. There are two methods available: {\tt "qr"} decomposition of {\tt X*t(X)} and {\tt "svd"} decomposition of matrix {\tt X}. The default value for the method is SVD decomposition.
+\item  {\tt bigmat, ncores} \, use of the \proglang{bigstatsr} package and number of the cores for computation respectively. The default value for the {\tt ncores} is {\tt 2}. The number of cores can be detected  with \proglang{detectCores()} and may be used in macOS and Linux systems.
+\end{itemize}
 
-also we have a second function, the matop function, this help us to compute the SVD or QR decomposition, the matop form is
+The \textbf{values returned} by the \textbf{HDBRR} function are listed in Table \ref{tab:HDBRRreturn}.
 
+\begin{table}[htbp!]
+\centering
+\begin{tabular}{  m{3cm}  m{11cm}  }
+\hline \textbf{Value} &  \\ \hline  \hline
+\$betahat $\left(\widehat{\B}\right)$  & (numeric, p) Vector with the beta estimates.  \\ \hline
+\$yhat $\left(\widehat{\y}\right)$  &  (numeric, n) Vector with the y's estimates.\\ \hline
+\$sdyhat & (numeric, n) Vector  with the standard deviations of the predicted values. \\ \hline
+\$sdpred &   (numeric, n) Vector  with the standard deviation of predicted variances. \\ \hline
+\$varb &  (numeric, p) Vector with the beta's variance. \\ \hline
+\$sigsqhat $\left(\widehat{\sigma}^2\right)$& (numeric)   estimated residual variance. The ``Empirical Bayes''  method is used. \\ \hline
+\$sigbsqhat $\left(\widehat{\sigma}_{\beta}^2\right)$&  (numeric)  estimated variance of beta. The ``Empirical Bayes'' method is used.
+ \\ \hline
+\$u &  (numeric, npts) Vector with the values of $u$.  \\ \hline
+\$postu $\pi(u\,|\,\y)$ &  (numeric, npts) Vector with the values of the $u$ posterior.\\ \hline
+\$uhat $\left(\hat{u}\right)$ &  (numeric) estimated $u$.% In previous sections this value was mentioned, this is $\hat{u} = \text{max arg}\,\pi(u\,|\, \y)$
+\\ \hline
+\$umode  &  (numeric) posterior mode of u.\\ \hline
+\$whichNa &   (integer) number of NA's in $\y$.   \\ \hline
+\$phat $\left(\widehat{\boldsymbol{p}}\right)$ &  (numeric, p) Vector selection probability of $x_i$.  \\ \hline
+\$delta $(\delta)$  &   (numeric) Value used in the variable selection. \\ \hline
+\$edf  &  (numeric) Value of the effective degrees of freedom for regression.  \\ \hline
+\$corr &   (numeric, n) Vector of the correlation between $\hat y_i$ and $y_i$.   \\ \hline
+\end{tabular}
+\vskip 5mm
+\caption{Values returned by the HDBRR function implemented in the \proglang{HDBRR} package with \proglang{R} software.}
+\label{tab:HDBRRreturn}
+\end{table}
+
+Also, the \textbf{matop} function  was implemented in the \proglang{HDBRR} package, it calculates the SVD and QR decompositions of an $\X$ matrix (specially if $\X$ is high dimensional) with the \proglang{bigstatsr} package. The function with its arguments is:
 \begin{GrayBox}
 \small
 \textbf{Box 1b: List of arguments of the matop function}
-
 \begin{verbatim}
 matop(y, X, method = c("svd", "qr"), bigmat = TRUE)
 \end{verbatim}
 \end{GrayBox}
+The arguments {\tt y, X, method} and {\tt bigmat} of the \textbf{matop} function are the same of the \textbf{HDBRR} function. The \textbf{values returned} by the \textbf{matop} function are listed in Table \ref{tab:matopreturn}.
 
-\subsection{Application Example}
-In this example we will use a database in the package named ``phenowheat", this contain data from a balanced, four-way multiparental cross population from four elite durum wheat cultivars (Neodur, Claudio, Colosseo, and Rascon/Tarro) that were chosen as diverse contributors of different alleles of agronomic relevance. The cultivars were crossed pair-wise following the scheme ([Neodur $\times$ Claudio] $\times$ [Colosseo $\times$ Rascon/Tarro], i.e., NCCR) to produce two-way $\text{F}_1$ NCCR hybrids. These four-way $\text{F}_1$ hybrids were advanced through single-seed descent and bulked in the $\text{F}_8$ generation. The final NCCR population includes 338 recombinant inbred lines (RILs) \citep{Milner}.This population is representative of segregating populations commonly used in wheat breeding, where the three- and four-way cross scheme is increasingly adopted to generate wider genotypic variance in segregating populations as compared with the traditional biparental cross \citep{Crossa}. \\\\ The final number of SNPs included in the NCCR linkage map was 7594. The markers were centered and standardized. Phenotypic evaluation of the NCCR population was performed during two growing seasons (2010-2011 and 2011-2012) in locations in the Po Valley representative of the target environments where durum wheat is grown: Cadriano in the 2010-2011 growin season (Cad11) and the 2011-2012 growing season (Cad12); Poggio Renatico in the 2010-2011 growing season (Pr11) and Argelato in the 2011-2012  growing season (Arg12). The 338 RILs, the four parents, and the five control genotypes were evaluated in an a-lattice incomplete-block experimental design; a 19 by 19 $\alpha$-lattice design with two replications was considered in each environment.The four traits included in this study were GY (Mg ha-1), HD (d), GWT (g 1000 kernels-1), and GVW (kg hL-1) where GY is the grain yield, HD the heading data, GWT the 1000-kernel weight and GVW the grain volume weight. The phenotypes of the four traits used for data analysis were the best linear unbiased estimates after recovering the incomplete block information (i.e., adjusting for the random incomplete block effect) in each environment and across environments \citep{Crossa}. \\\\
+\begin{table}[htbp!]
+\centering
+\begin{tabular}{  m{3.5cm}  m{10cm}  }
+\multicolumn{2}{c}{(a) SVD}  \\
+\hline \textbf{Value} &  \\ \hline  \hline
+\$y  & (numeric, n)  Data vector. NAs allowed.  \\ \hline
+\$X   & Design matrix of dimension $n \times p$. \\ \hline
+\$D & Vector containing the singular values of $\X$ of length $\min(n,p)$. \\ \hline
+\$L & A matrix whose columns contain the left singular vectors of $\X$. \\ \hline
+\$R & A matrix whose columns contain the right singular vectors of $\X$.  \\ \hline
+\$ev & A vector containing the square of D. \\ \hline
+\$Ly & The cross-product between the matrix L and vector y. \\ \hline
+\$n & Number of rows of X.\\ \hline
+\$p  & Number of columns of X.\\ \hline
+\end{tabular}
+\vskip 5mm
 
-The next code shows the HDBRR function with this data, $y$ is obtained with the lmer function, this allows us to find the BLUP of the line with respect to the environment.
+\vskip 5mm
+\begin{tabular}{  m{3.5cm}  m{10cm}  }
+\multicolumn{2}{c}{(b) QR}\\
+\hline \textbf{Value} &  \\ \hline  \hline
+\$y  & (numeric, n)  Data vector. NAs allowed.  \\ \hline
+\$X   &  Design matrix of dimension $n \times p$. \\ \hline
+\$R & An upper triangular matrix of dimension $p \times p$.\\ \hline
+\$n & Number of rows of X.\\ \hline
+\$p  & Number of columns of X.\\ \hline
+\$Q  & A matrix of dimension $n \times p$.\\ \hline
+\end{tabular}
+\vskip 5mm
+\caption{Values returned by the HDBRR function  when the (a) SVD  and  (b) QR decompositions are used.}
+\label{tab:matopreturn}
+\end{table}
+
+\textbf{Summary, plot and predict functions}\\\\
+For variable selection  and  visualization of  results for class ``HDBRR'', the package contains the following functions.
 
 \begin{GrayBox}
 \small
-\textbf{Box 1c: Example with dataset "phenowheat"}
+\textbf{Box 1c: List of arguments of the summary, plot and predict functions}
 
 \begin{verbatim}
-data("phenowheat")
-mod <- lmer(pheno$HD~pheno$env+(1|pheno$Line))
-y <- unlist(ranef(mod))
-n <- length(y)
-X <- scale(X, scale=F)
-fitall <- HDBRR(y, X/sqrt(ncol(X)), intercept = FALSE, corpred = "eb", c = 100)
-summary(fitall)
-plot(fitall)
+summary(object, all.coef = FALSE, crit = log(4), ...)
+
+plot(x, crit = log(4), ...)
+
+predict(object,  ...)
 \end{verbatim}
 \end{GrayBox}
-The code in the Box 1c return the results for fitall, this shows us the coefficients obtained. If we have $p > 250$, the object shows only 250 coefficients.
+
+The \textbf{inputs} for these functions are:
+\begin{itemize}
+\item {\tt object} \, An HDBRR object generated by a call to HDBRR.
+\item {\tt all.coef} \, Logical value. If {\tt all.coef = TRUE}, estimations for all the regression parameters are returned; otherwise,  only for those whose {\tt 2*log(bayes factor)>crit}.
+\item {\tt crit} \, Numerical value. The lower bound of the log Bayes factor in favor to include a variable in the model. The default value for {\tt crit} is {\tt log(4)}.
+\item {\tt ...} \, Additional arguments to be passed to or from other methods.
+\item {\tt x} \, An HDBRR object, typically generated by a call to HDBRR (for the {\tt print.HDBRR} and {\tt plot.HDBRR} functions) or an object of class {\tt summary.HDBRR} (for the {\tt print.summary.HDBRR} function).
+\end{itemize}
+
+The \textbf{returned values} for the \textbf{summary} is a list of estimated coefficients ({\tt Estimate}), their standard deviations ({\tt Std. dev}), the signal-to-noise ratio ({\tt SNR}) and twice the conditional log Bayes Factor en favor to include each covariate ({\tt 2ln(BF)}). When {\tt all.coef = TRUE}, then estimations for all ridge regression parameters will be returned, otherwise only for those whose {\tt 2ln(BF)>crit}. The default value for {\tt crit} is {\tt log(4)}. The interpretation of {\tt 2ln(BF)} is in the ``Kass-Raftery'' scale \citep{kassbayes95}, where
+
+\begin{table}[htbp!]
+\centering
+\begin{tabular}{  ccr }
+\hline
+$\boldsymbol{2 \log (\textbf{Bayes Factor})}$ & \textbf{Bayes Factor} & \textbf{Evidence against $\boldsymbol{H_0}$} \\
+\hline
+($-\infty$,0) & $[0,1)$ & Negative \\
+$[0,2)$ & $[1,3)$ & Weak \\
+$[2,6)$ & $[3,20)$ & Positive \\
+$[6,10)$ & $[20,150)$ & Strong \\
+$[10,+\infty)$ & $[150,+\infty)$ & Very Strong \\
+\hline\\
+\end{tabular}
+\caption{Bayes Factor interpretation using ``Kass-Raftery'' scale.}
+\label{tab:bayesfactor}
+\end{table}
+
+Also, the {\tt summary} function returns the estimation for the ridge parameter ($\hat{\lambda}$) and the \textbf{effective degrees of freedom} (edf). When the {\tt corpred} argument is {\tt NULL}, then the {\tt edf} value will be {\tt NULL}. If the {\tt c} value is {\tt NULL}, then the Bayes Factor will not be calculated. \\\\
+The {\tt plot} function returns three graphs: 1) the plot  of $\hat{\beta} \,\, \text{vs} \,\,  \hat{p}$, 2) a plot with 4 subplots, \textbf{predicted values vs observed values}, \textbf{coefficients}, \textbf{Std. dev.} (for coefficients) and \textbf{SNR} and 3) the plot of the \textbf{``Marginal Posterior of u''}.
+CAMBIAR en la siguiente versi\'on la gr\'afica 2) de modo que los cuatro gr\'aficos se produzcan individualmente, como en lm. \\\\
+The {\tt predict} function returns a vector with the predicted values $\left(\hat{\y}\right)$.
+\\\\
+\textbf{Dataset}\\\\
+The \proglang{HDBRR} package comes with a dataset named \textbf{``phenowheat''}, which contains data from a balanced four-way multi-parental cross population from four elite durum wheat cultivars (Neodur, Claudio, Colosseo, and Rascon/Tarro) that were chosen as diverse contributors of different alleles of agronomic relevance.
+The final population includes 338 recombinant inbred lines (RILs)  and the final number of SNPs included in the linkage map was 7594, which were centered and standardized. Phenotypic evaluation of the population was performed during two growing seasons (2010-2011 and 2011-2012) in locations in the Po Valley: Cadriano in the 2010-2011 growing season (Cad11) and the 2011-2012 growing season (Cad12); Poggio Renatico in the 2010-2011 growing season (Pr11) and Argelato in the 2011-2012  growing season (Arg12). The four traits included in this study where grain yield GY (Mg ha$^{-1}$), heading data HD (d) , 1000-kernel weight GWT (g 1000 kernels$^{-1}$)  and grain volume weight GVW (kg hL$^{-1}$) . For a detailed description of the data set see \cite{Milner}.
 
 \begin{GrayBox}
 \small
-\textbf{Box 1c: Structure of the object fitall returned by HDBRR (after running the code in Box 1c)}
+\textbf{Box 2: Loading the phenowheat data set included in HDBRR}
+
+\begin{verbatim}
+library(HDBRR)
+data(phenowheat)
+\end{verbatim}
+\end{GrayBox}
+
+\newpage
+\subsection{Application Example}
+In order to illustrate the use of the  \proglang{HDBRR} package with other real data and to show the outputs obtained, the methods summary, predict and plot are shortly explained
+\\\\
+Consider the  ``phenowheat'' data set included in \proglang{HDBRR}.
+The data are loaded as in the {\tt Box 2}. In order to obtain the $y$ vector,   the \proglang{lmer} function is used. This allow us to find the best linear unbiased predictions of the HD trait after adjusting for the environment (see {\tt Box 3b part \#1\#}).
+
+\begin{GrayBox}
+\small
+\textbf{Box 3b: Example with dataset ``phenowheat"}
+
+\begin{verbatim}
+#1# mod <- lmer(pheno$HD~pheno$env+(1|pheno$Line))
+y <- unlist(ranef(mod))
+
+#2# n <- length(y)
+X <- scale(X, scale=F)
+fitall <- HDBRR(y, X/sqrt(ncol(X)), intercept = FALSE, corpred = "eb",
+	c = 100)
+
+#3# fitall
+summary(fitall, crit = 0)
+plot(fitall, crit = 0)
+predict(fitall)
+\end{verbatim}
+\end{GrayBox}
+
+In second part ({\tt \#2\#}) the fit is done by calling the \textbf{HDBRR} function where the covariates are scaled to avoid extremely small regression coefficients. In the third part ({\tt \#3\#}) the results for {\tt fitall} are returned.   If $p > 250$, then only 250 coefficients are displayed. \\\\ In  {\tt Box 3c} the structure of the object returned by \textbf{HDBRR} function is shown. For this case 250 coefficients were returned, but in the Box only 14 coefficients were printed.
+
+\begin{GrayBox}
+\small
+\textbf{Box 3c: Structure of the object {\tt fitall} returned by HDBRR (after running the code in Box 3b part \#3\#)}
 
 \begin{verbatim}
 > fitall
@@ -527,13 +674,11 @@ Coefficients:
 \end{verbatim}
 \end{GrayBox}
 
-In the same way, the object HDBRR returns a list of 21 elements, included betahat ($\hat{\B}$), yhat ($\hat{\y}$), sigsqhat ($\hat{\sigma}^2$) and sigbsqhat ($\hat{\sigma}_{\beta}^2$).
-
-\newpage
+The object HDBRR is a list of 21 elements, included betahat ($\hat{\B}$), yhat ($\hat{\y}$), sigsqhat ($\hat{\sigma}^2$) and sigbsqhat ($\hat{\sigma}_{\beta}^2$). In the {\tt Box 3d} there are some elements contained by an object of the class \textbf{HDBRR} .
 
 \begin{GrayBox}
 \small
-\textbf{Box 1d: Structure of the object returned by HDBRR (after running the code in Box 1c)}
+\textbf{Box 3d: Structure of the object returned by HDBRR (after running the code in Box 3b)}
 
 \begin{verbatim}
 str(fm)
@@ -546,124 +691,80 @@ List of 21
  $ sigsqhat     : num 2.52
  $ sigbsqhat    : num 6.88
  $ u            : num [1:200] 0.116 0.117 0.119 ...
- $ postu        : Named num [1:200] 0.116 0.117 0.119 ...
+ $ postu        : Named num [1:200] 2.22e-05 2.73e-05 ...
  ..- attr(*,"names") = chr [1:200]  "84.1344\%" ...
  $ uhat         : num 0.273
  $ umode        : num 0.261
  $ whichNa      : int(0)
- $ phat         : num [1:7594] 0.52 0.52 0.521 ...
+ $ phat         : num [1:7594] 3.53e-04 1.02e-03 ...
  $ delta        : num 7.96
  $ edf          : num 140
  $ corr         : num [1:338] 0.804 0.818 0.793 ...
- $ y            : num [1:338] 0.0228 -1.5949 2.7807 ...
- $ intercept    : num 0
 \end{verbatim}
 \end{GrayBox}
-
-Now, we have the option for a summary, this function returns the \texttt{estimate}, \texttt{standard deviation}, \texttt{SNR} and $2\log{BF}$ for the coefficients, in the principal function we have the argument \texttt{c}, when \texttt{c = NULL} then the summary don't have the last column (\texttt{$2\log{BF}$}). Even more, we have the arguments \texttt{all.coef} and \texttt{crit}, when we have \texttt{all.coef = TRUE} then summary returns all coefficients, but when we have \texttt{all.coef = FALSE} (the default value) summary only returns the coefficients that \texttt{log(bayes factor) > crit} where the default value for \texttt{crit} is \texttt{log{(4)}}. the summary returns the \texttt{ridge parameter} ($\lambda$) and the \texttt{effective degrees of freedom} (edf) too, when \texttt{c = NULL}, \texttt{edf = NULL}. \\ The form of the summary is in the Box 1e.
-
+The \textbf{summary} function was explained above. Here, the {\tt crit} argument was set equal to 0 because the probability of inclusion in very low  (the default value for this argument is {\tt log{4}}).
 \newpage
-
 \begin{GrayBox}
 \small
-\textbf{Box 1e: Summary of the object returned by HDBRR (after running the code in Box 1c) using the default values}
+\textbf{Box 3e: Summary of the object returned by HDBRR (after running the code in Box 3b part \#3\#).}
 
 \begin{verbatim}
-> summary(fitall)
+> summary(fitall, crit = 0)
 
 Call:
-HDBRR(y = y, X = X/sqrt(ncol(X)), intercept = F, c = 100, corpred = "eb")
-
+HDBRR(y = y, X = X/sqrt(ncol(X)), intercept = FALSE, c = 100,
+    corpred = "eb")
 
 Coefficients:
-       Estimate  Std. dev       SNR  2ln(BF)
-X1187  2.448331 0.7079706  3.458238 1.733250
-X1189 -3.477229 0.5949053 -5.845014 3.105383 *
-X1190 -3.411983 0.5887797 -5.795009 3.020875 *
-X1191 -3.437302 0.6060903 -5.671272 3.056947 *
-X1192 -3.578898 0.6424279 -5.570895 3.252233 *
-X1193 -3.595580 0.6084415 -5.909492 3.273802 *
-X1194 -3.548588 0.5963829 -5.950185 3.206101 *
-X1195 -3.581506 0.6196334 -5.780039 3.257444 *
-X1196 -3.376780 0.5930485 -5.693935 2.971416 *
-X1197 -3.444590 0.6027798 -5.714507 3.063753 *
-X1198 -3.443699 0.6013025 -5.727066 3.062512 *
-X1199 -3.395415 0.5896655 -5.758205 2.995950 *
-X1200  2.524250 0.7140561  3.535086 1.811552
-X1205 -3.623269 0.6607038 -5.483955 3.312073 *
-X1931 -2.484760 0.6701858 -3.707569 1.845033
-X1932 -2.422271 0.6321472 -3.831815 1.774233
-X1933 -2.417706 0.6402461 -3.776214 1.769846
-X1934 -2.452866 0.6641450 -3.693269 1.807623
-X1935 -2.120806 0.7404535 -2.864199 1.433109
-X1936 -2.752589 0.7502858 -3.668721 2.168280 *
-X1937 -2.437252 0.6639373 -3.670907 1.790789
-X1938 -2.572225 0.6453258 -3.985932 1.946329
-X1950  2.164019 0.7499884  2.885403 1.447961
+       Estimate  Std. dev       SNR   2ln(BF)
+X1189 -3.477229 0.5949053 -5.845014 0.7370653
+X1190 -3.411983 0.5887797 -5.795009 0.6232837
+X1191 -3.437302 0.6060903 -5.671272 0.6674882
+X1192 -3.578898 0.6424279 -5.570895 0.9133567
+X1193 -3.595580 0.6084415 -5.909492 0.9422146
+X1194 -3.548588 0.5963829 -5.950185 0.8609486
+X1195 -3.581506 0.6196334 -5.780039 0.9178934
+X1196 -3.376780 0.5930485 -5.693935 0.5616503
+X1197 -3.444590 0.6027798 -5.714507 0.6802414
+X1198 -3.443699 0.6013025 -5.727066 0.6786374
+X1199 -3.395415 0.5896655 -5.758205 0.5942924
+X1205 -3.623269 0.6607038 -5.483955 0.9899897
 -----
 Signif. codes: 10 '***' 6 '**' 2 '*' 0 ' '
-
 
 Ridge parameter: 0.3754
 Effective degrees of freedom: 140.3917
 \end{verbatim}
 \end{GrayBox}
 
+Note that the estimation of the ridge parameter returned is $\hat{\lambda}= 0.3754$. The estimated effective degrees of freedom ($edf$) are equal to 140.3917.  \\\\ Similarly, the {\tt plot} function was discussed above and for this example the results are shown in Figure \ref{fig:results1}. For variable selection, in the {\tt plot} function the value of the {\tt crit} argument was set to 0,  such that  in the estimated coefficients vs selection probability plot,  the variable names that appear are those for which $2\log{(\text{BF}) > 0}$ (see Figure \ref{fig:results} (a)). \\\\ Figure  \ref{fig:results1} (b) is the marginal posterior of $u$.
+\\\\ The {\tt predict} function applied to the object \proglang{HDBRR} {\tt fitall} returns the predictions of the model, which are the mean of the posterior predictive distribution. See {\tt Box 3f} \\
+\newpage
+\begin{GrayBox}
+\small
+\textbf{Box 3f: Predict of the object returned by HDBRR (after running the code in Box 3b part \#3\#).}
 
-The other function implemented for a package HDBRR is plot, this returns the variable selection graphs, this use the argument \texttt{crit = log(4)} as default value. The graphs ``y observed vs y predicted", ``coefficients",``Std.dev." and ``SNR" are included too. Finally we have the graph of ``Marginal posterior of u". Then with \texttt{plot(fitall)} we obtain Figures \ref{fig:selection}, \ref{fig:multi} and \ref{fig:post}.
+\begin{verbatim}
+> predict(fitall)
 
+  [1] -0.39403 -0.52017  2.87568  1.51151  0.11663  0.70171  0.12358  ...
+ [10] -2.15284  0.62729 -2.25787  2.89244  1.41203  0.50038 -0.44047  ...
+ [19]  1.90388 -2.76213 -1.91036  2.99180  3.89731  1.10541  1.47814 ...
+ [28]  0.38303 -1.05772 -0.47791 -0.91379 -1.00456 -0.85098 -1.25591  ...
+\end{verbatim}
+\end{GrayBox}
 
-
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.75\textwidth]{2}
-  \caption{Estimate coefficients vs selection probability of $x_i$.}
-  \label{fig:selection}
-\end{figure}
-
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.75\textwidth]{3}
-  \caption{y observed vs y predicted, Coefficients, td.dev. and SNR.}
-  \label{fig:multi}
-\end{figure}
-
-
-
-\begin{figure}[!htb]
-  \centering
-  \includegraphics[width=0.75\textwidth]{4}
-  \caption{Marginal posterior of u.}
-  \label{fig:post}
-\end{figure}
-
-Finally we have the option \texttt{predict} for a HDBRR object, this returns the vector of predicted values.\\
-
-One option to study the results obtained with the package is to use the cross validation, in this case we use a K-Fold cross validation with $K=10$, and we obtain the results in the Table \ref{tab:kfold}.
-
-\begin{table}[ht]
+Finally, the Figure \ref{fig:results1} (c) has 4 subplots, predicted values vs observed values, coefficients, Std. dev. (for coefficients) and SNR. The first subplot (predicted values vs observed values) include the Spearman correlation, for this case this value is 0.9196. \\\\ It is mentioned that the ability of MCMCs to sample from modern-day high-dimensional posteriors has been limited by a widespread perception that these chains typically experience serious convergence problems. Figure \ref{fig:results1} (b) shows evidence on the advantage of the HDBRR over MCMC, the posterior distribution is always calculated.
+\newpage
+\begin{figure}[htbp!]
 \centering
-\begin{tabular}{lrr}
-  \hline
-  & MSE & Correlation \\
-  \hline
-Fold = 1 & 4.7367 & 0.6752 \\
-  Fold = 2 & 5.9848 & 0.3813 \\
-  Fold = 3 & 3.533 & 0.5907 \\
-  Fold = 4 & 4.772 & 0.6583 \\
-  Fold = 5 & 3.9884 & 0.6657 \\
-  Fold = 6 & 5.8835 & 0.5838 \\
-  Fold = 7 & 3.4608 & 0.5146 \\
-  Fold = 8 & 3.6765 & 0.6828 \\
-  Fold = 9 & 5.1121 & 0.553 \\
-  Fold = 10 & 2.7146 & 0.6892 \\
-  Pooled & 4.3862 & 0.5995 \\
-   \hline
-\end{tabular}
-\caption{K-Fold cross validation with K=10}
-\label{tab:kfold}
-\end{table}
-
+\subfloat[Estimated coefficients vs selection probability of $x_i$.]{\includegraphics[width=70mm]{2}}
+\subfloat[ Marginal posterior of $u$.]{\includegraphics[width=70mm]{4}}\\
+\subfloat[ $\y$ observed vs $\y$ predicted and their correlation, Coefficients, td.dev. and SNR.]{\includegraphics[width=100mm]{3}}
+\caption{Plots returned for the object {\tt fitall} produced by the \textbf{HDBRR} function.}
+\label{fig:results1}
+\end{figure}
+\newpage
 
 \section{Conclusions}
 
